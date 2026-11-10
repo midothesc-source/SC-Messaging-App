@@ -1,0 +1,184 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity 1: ChatThread Validation Blueprint
+    function isValidChatThread(data) {
+      return data.keys().hasAll([
+               'userId', 'name', 'nameAr', 'avatarInitials', 'avatarColorHex',
+               'spaceCategory', 'isPinned', 'unreadCount', 'lastMessagePreview',
+               'lastMessagePreviewAr', 'lastMessageTime', 'isOnline',
+               'roleOrTitle', 'roleOrTitleAr', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'name', 'nameAr', 'avatarInitials', 'avatarColorHex',
+               'spaceCategory', 'isPinned', 'unreadCount', 'lastMessagePreview',
+               'lastMessagePreviewAr', 'lastMessageTime', 'isOnline',
+               'roleOrTitle', 'roleOrTitleAr', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.nameAr is string && data.nameAr.size() >= 1 && data.nameAr.size() <= 100 &&
+             data.avatarInitials is string && data.avatarInitials.size() >= 1 && data.avatarInitials.size() <= 10 &&
+             data.avatarColorHex is string && data.avatarColorHex.size() >= 1 && data.avatarColorHex.size() <= 20 &&
+             data.spaceCategory is string && data.spaceCategory in ['VIP', 'Work', 'Family'] &&
+             data.isPinned is bool &&
+             data.unreadCount is int && data.unreadCount >= 0 && data.unreadCount <= 9999 &&
+             data.lastMessagePreview is string && data.lastMessagePreview.size() <= 500 &&
+             data.lastMessagePreviewAr is string && data.lastMessagePreviewAr.size() <= 500 &&
+             data.lastMessageTime is string && data.lastMessageTime.size() >= 1 && data.lastMessageTime.size() <= 40 &&
+             data.isOnline is bool &&
+             data.roleOrTitle is string && data.roleOrTitle.size() <= 100 &&
+             data.roleOrTitleAr is string && data.roleOrTitleAr.size() <= 100 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // Entity 2: ChatMessage Validation Blueprint
+    function isValidChatMessage(data, parentChatId) {
+      return data.keys().hasAll([
+               'userId', 'chatId', 'senderId', 'senderName', 'textEn', 'textAr',
+               'messageType', 'voiceDurationSec', 'voiceTranscriptEn', 'voiceTranscriptAr',
+               'mediaTitle', 'mediaResolution', 'mediaSizeLabel', 'mediaDrawableName',
+               'status', 'translatedText', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'chatId', 'senderId', 'senderName', 'textEn', 'textAr',
+               'messageType', 'voiceDurationSec', 'voiceTranscriptEn', 'voiceTranscriptAr',
+               'mediaTitle', 'mediaResolution', 'mediaSizeLabel', 'mediaDrawableName',
+               'status', 'translatedText', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.chatId is string && data.chatId == parentChatId && data.chatId.size() >= 1 && data.chatId.size() <= 128 &&
+             data.senderId is string && data.senderId in ['me', 'contact', 'ai'] &&
+             data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 100 &&
+             data.textEn is string && data.textEn.size() <= 4000 &&
+             data.textAr is string && data.textAr.size() <= 4000 &&
+             data.messageType is string && data.messageType in ['TEXT', 'VOICE', 'HD_MEDIA'] &&
+             data.voiceDurationSec is int && data.voiceDurationSec >= 0 && data.voiceDurationSec <= 3600 &&
+             data.voiceTranscriptEn is string && data.voiceTranscriptEn.size() <= 2000 &&
+             data.voiceTranscriptAr is string && data.voiceTranscriptAr.size() <= 2000 &&
+             data.mediaTitle is string && data.mediaTitle.size() <= 200 &&
+             data.mediaResolution is string && data.mediaResolution.size() <= 60 &&
+             data.mediaSizeLabel is string && data.mediaSizeLabel.size() <= 60 &&
+             data.mediaDrawableName is string && data.mediaDrawableName.size() <= 100 &&
+             data.status is string && data.status in ['SENT', 'DELIVERED', 'READ'] &&
+             data.translatedText is string && data.translatedText.size() <= 4000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // Entity 3: VaultItem Validation Blueprint
+    function isValidVaultItem(data) {
+      return data.keys().hasAll([
+               'userId', 'title', 'content', 'category',
+               'sizeOrDomain', 'isPinned', 'tag', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'title', 'content', 'category',
+               'sizeOrDomain', 'isPinned', 'tag', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 4000 &&
+             data.category is string && data.category in ['NOTE', 'LINK', 'FILE'] &&
+             data.sizeOrDomain is string && data.sizeOrDomain.size() <= 120 &&
+             data.isPinned is bool &&
+             data.tag is string && data.tag.size() <= 60 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      // 1. User-scoped Chat Threads
+      match /chats/{chatId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(chatId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(userId) &&
+                         isValidId(chatId) &&
+                         isValidChatThread(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(userId) &&
+                         isValidId(chatId) &&
+                         isValidChatThread(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'name', 'nameAr', 'spaceCategory', 'isPinned', 'unreadCount',
+                           'lastMessagePreview', 'lastMessagePreviewAr', 'lastMessageTime',
+                           'isOnline', 'roleOrTitle', 'roleOrTitleAr', 'updatedAt'
+                         ]);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(chatId);
+
+        // 2. Messages inside a Chat Thread
+        match /messages/{messageId} {
+          allow get: if isOwner(userId) && isValidId(userId) && isValidId(chatId) && isValidId(messageId);
+          allow list: if isOwner(userId);
+          allow create: if isOwner(userId) &&
+                           isValidId(userId) &&
+                           isValidId(chatId) &&
+                           isValidId(messageId) &&
+                           isValidChatMessage(incoming(), chatId);
+          allow update: if isOwner(userId) &&
+                           isValidId(userId) &&
+                           isValidId(chatId) &&
+                           isValidId(messageId) &&
+                           isValidChatMessage(incoming(), chatId) &&
+                           incoming().userId == existing().userId &&
+                           incoming().chatId == existing().chatId &&
+                           incoming().createdAt == existing().createdAt &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'status', 'translatedText', 'voiceTranscriptEn', 'voiceTranscriptAr', 'updatedAt'
+                           ]);
+          allow delete: if isOwner(userId) && isValidId(userId) && isValidId(chatId) && isValidId(messageId);
+        }
+      }
+
+      // 3. User-scoped SC Vault Items
+      match /vault_items/{itemId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(itemId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(userId) &&
+                         isValidId(itemId) &&
+                         isValidVaultItem(incoming());
+        allow update: if isOwner(userId) &&
+                         isValidId(userId) &&
+                         isValidId(itemId) &&
+                         isValidVaultItem(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'title', 'content', 'category', 'sizeOrDomain', 'isPinned', 'tag', 'updatedAt'
+                         ]);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(itemId);
+      }
+    }
+  }
+}

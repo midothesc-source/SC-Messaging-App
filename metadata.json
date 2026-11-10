@@ -1,0 +1,6 @@
+{
+  "name": "SC Messenger",
+  "description": "Next-generation bilingual super-messaging platform with Smart Spaces, SC Vault, HD media, voice transcripts, and built-in SC AI Assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

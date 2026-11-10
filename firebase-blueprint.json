@@ -1,0 +1,277 @@
+{
+  "entities": {
+    "ChatThread": {
+      "title": "ChatThread",
+      "description": "A bilingual messaging conversation thread belonging to a user in a specific Smart Space.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID."
+        },
+        "name": {
+          "type": "string",
+          "description": "Contact or group name in English."
+        },
+        "nameAr": {
+          "type": "string",
+          "description": "Contact or group name in Arabic."
+        },
+        "avatarInitials": {
+          "type": "string",
+          "description": "Initials displayed in the avatar badge."
+        },
+        "avatarColorHex": {
+          "type": "string",
+          "description": "Hex color code for avatar accent."
+        },
+        "spaceCategory": {
+          "type": "string",
+          "enum": ["VIP", "Work", "Family"],
+          "description": "Smart Space filter category."
+        },
+        "isPinned": {
+          "type": "boolean",
+          "description": "Whether the conversation is pinned to the top."
+        },
+        "unreadCount": {
+          "type": "integer",
+          "description": "Count of unread messages in the thread."
+        },
+        "lastMessagePreview": {
+          "type": "string",
+          "description": "Preview of the latest message in English."
+        },
+        "lastMessagePreviewAr": {
+          "type": "string",
+          "description": "Preview of the latest message in Arabic."
+        },
+        "lastMessageTime": {
+          "type": "string",
+          "description": "Formatted timestamp label for the latest message."
+        },
+        "isOnline": {
+          "type": "boolean",
+          "description": "Whether the contact is currently active online."
+        },
+        "roleOrTitle": {
+          "type": "string",
+          "description": "Subtitle or role in English."
+        },
+        "roleOrTitleAr": {
+          "type": "string",
+          "description": "Subtitle or role in Arabic."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of thread creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "nameAr",
+        "avatarInitials",
+        "avatarColorHex",
+        "spaceCategory",
+        "isPinned",
+        "unreadCount",
+        "lastMessagePreview",
+        "lastMessagePreviewAr",
+        "lastMessageTime",
+        "isOnline",
+        "roleOrTitle",
+        "roleOrTitleAr",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "A message inside a ChatThread supporting text, voice notes with transcripts, HD media, and instant translation.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID."
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Parent ChatThread document ID."
+        },
+        "senderId": {
+          "type": "string",
+          "enum": ["me", "contact", "ai"],
+          "description": "Who sent the message."
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Display name of the sender."
+        },
+        "textEn": {
+          "type": "string",
+          "description": "English message content."
+        },
+        "textAr": {
+          "type": "string",
+          "description": "Arabic message content."
+        },
+        "messageType": {
+          "type": "string",
+          "enum": ["TEXT", "VOICE", "HD_MEDIA"],
+          "description": "Type of message payload."
+        },
+        "voiceDurationSec": {
+          "type": "integer",
+          "description": "Duration in seconds for VOICE messages."
+        },
+        "voiceTranscriptEn": {
+          "type": "string",
+          "description": "1-Tap Transcript in English for VOICE messages."
+        },
+        "voiceTranscriptAr": {
+          "type": "string",
+          "description": "1-Tap Transcript in Arabic for VOICE messages."
+        },
+        "mediaTitle": {
+          "type": "string",
+          "description": "Title of the 100% HD uncompressed media file."
+        },
+        "mediaResolution": {
+          "type": "string",
+          "description": "Resolution badge (e.g. 3840x2160 RAW 100% HD)."
+        },
+        "mediaSizeLabel": {
+          "type": "string",
+          "description": "File size label (e.g. 18.4 MB Lossless)."
+        },
+        "mediaDrawableName": {
+          "type": "string",
+          "description": "Local drawable identifier for the HD preview."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["SENT", "DELIVERED", "READ"],
+          "description": "Delivery status ticks."
+        },
+        "translatedText": {
+          "type": "string",
+          "description": "Cached AI instant translation if generated."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of message creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last message update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "chatId",
+        "senderId",
+        "senderName",
+        "textEn",
+        "textAr",
+        "messageType",
+        "voiceDurationSec",
+        "voiceTranscriptEn",
+        "voiceTranscriptAr",
+        "mediaTitle",
+        "mediaResolution",
+        "mediaSizeLabel",
+        "mediaDrawableName",
+        "status",
+        "translatedText",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "VaultItem": {
+      "title": "VaultItem",
+      "description": "An item stored in the user's personal organized SC Vault cloud space (note, link, or file).",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated owner UID."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the vault note, link, or file."
+        },
+        "content": {
+          "type": "string",
+          "description": "Body content, URL, or file metadata description."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["NOTE", "LINK", "FILE"],
+          "description": "Vault item type."
+        },
+        "sizeOrDomain": {
+          "type": "string",
+          "description": "File size or domain badge."
+        },
+        "isPinned": {
+          "type": "boolean",
+          "description": "Whether the vault item is pinned."
+        },
+        "tag": {
+          "type": "string",
+          "description": "Organizational tag label."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "content",
+        "category",
+        "sizeOrDomain",
+        "isPinned",
+        "tag",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/chats/{chatId}": {
+      "schema": {
+        "$ref": "#/entities/ChatThread"
+      },
+      "description": "User-scoped chat threads organized by Smart Spaces."
+    },
+    "/users/{userId}/chats/{chatId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/ChatMessage"
+      },
+      "description": "Messages inside a user's chat thread."
+    },
+    "/users/{userId}/vault_items/{itemId}": {
+      "schema": {
+        "$ref": "#/entities/VaultItem"
+      },
+      "description": "User-scoped personal SC Vault items (notes, links, and files)."
+    }
+  }
+}
